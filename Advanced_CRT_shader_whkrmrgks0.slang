@@ -134,7 +134,6 @@ void main(){
     float mask = brd*vign;
     scan = pow(scan,vec3(gma));
     vec3 grided = scan*grid*3.;
-    vec3 discr = min(scan*1.,1.);
-    vec3 final = mix(grided,scan,discr)*mask;
+    vec3 final = min(mix(grided,scan,scan),vec3(1.))*mask;
     FragColor = vec4(final,1.);
 }
