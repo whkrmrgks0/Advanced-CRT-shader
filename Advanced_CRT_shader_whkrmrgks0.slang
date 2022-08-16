@@ -89,7 +89,7 @@ float grd(vec2 uv, vec2 disp){
 void pinc(vec2 uv, inout vec2 uv2, inout float mxbf, inout float vign){
     uv2 = (uv*vec2(2.)-vec2(1.))*vec2(1.+marginv);
     float L = length(uv2);
-    uv2 = normalize(uv2)*(L-(1.-L)*tanh(L*cus));//pincushion
+    uv2 = vec2(uv2.x/(cos(abs(uv2.y*cus)*tau/4.)),uv2.y/(cos(abs(uv2.x*cus)*tau/4.)));
     vec2 uvbef = abs(uv2)-vec2(1.);//boarder
     mxbf = max(uvbef.x,uvbef.y);
     vign = max(uvbef.x*uvbef.y,.0);
