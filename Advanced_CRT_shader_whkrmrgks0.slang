@@ -21,8 +21,9 @@ layout(push_constant) uniform Push{
     float capa;
     float capaiter;
     float capashape;
-    float scanline;
+    float scl;
     float gma;
+    float sling;
 };
 
 layout(set = 0, binding = 0, std140) uniform UBO
@@ -30,7 +31,7 @@ layout(set = 0, binding = 0, std140) uniform UBO
    mat4 MVP;
    vec4 OutputSize;
    vec4 SourceSize;
-} global;
+};
 
 #pragma parameter cus "CRT curvature" 0.15 0.0 1.0 0.01
 #pragma parameter vstr "Vignette strength" 0.05 0.0 1.0 0.01
@@ -38,11 +39,12 @@ layout(set = 0, binding = 0, std140) uniform UBO
 #pragma parameter dts "Phosper size" 1.0 1.0 3.0 1.0
 #pragma parameter AAz "De-moire conv iteration" 64.0 2.0 256.0 1.0
 #pragma parameter vex "De-moire conv size" 2.0 0.0 4.0 0.1
-#pragma parameter capa "Horizontal convolution size" 0.004 0.0 0.2 0.0001
+#pragma parameter capa "Horizontal convolution size" 0.004 0.0 0.01 0.001
 #pragma parameter capaiter "Horizontal convolution iterations" 3.0 1.0 20.0 1.0
 #pragma parameter capashape "Horizontal convololution kernel shape" 3.0 1.0 40.0 0.1
-#pragma parameter scanline "Scnaline count, set 0 to match with input" 160.0 0.0 1080.0 1.0
-#pragma parameter gma "Gamma correction" 1.0 0.0 4.0 0.1
+#pragma parameter scl "Scnaline count, set 0 to match with input" 240.0 0.0 1080.0 1.0
+#pragma parameter gma "Gamma correction" 1.3 0.1 4.0 0.1
+#pragma parameter sling "line bleed" 2.0 1.0 2.0 0.1
 
 #pragma stage vertex
 layout(location = 0) in vec4 Position;
@@ -50,7 +52,7 @@ layout(location = 1) in vec2 TexCoord;
 layout(location = 2) out vec2 vTexCoord;
 
 void main(){
-   gl_Position = global.MVP * Position;
+   gl_Position = MVP * Position;
    vTexCoord = TexCoord;
 }
 
@@ -87,6 +89,16 @@ float grd(vec2 uv, vec2 disp){
     return square(uv.x,2.,6.)*square(uv.y,1.,2.);
 }
 
+vec3 tpscany (vec3 bef,vec3 ucj,vec3 dcj,float temp,float devi){
+    vec3 scan = vec3(.0);
+        temp = clamp(.0,1.,sawtooth(temp))+devi;
+        scan += max((triangle(temp)-1.+(bef*sling)),.0);
+        scan += max((clamp(.0,1.,temp*2.-1.)-2.)+(ucj*sling),.0);
+        scan += max((clamp(.0,1.,-(temp*2.-1.))-2.)+(dcj*sling),.0);
+        return scan/(sling*0.5);
+        //return scan;
+}    
+        
 void pinc(vec2 uv, inout vec2 uv2, inout float mxbf, inout float vign, float ar){
     uv2 = (uv*vec2(2.)-vec2(1.))*vec2((1.+marginv),(1.+marginv*ar));
     uv2 = vec2(uv2.x/(cos(abs(uv2.y*cus)*tau/4.)),uv2.y/(cos(abs(uv2.x*cus*ar)*tau/4.)));
@@ -97,45 +109,65 @@ void pinc(vec2 uv, inout vec2 uv2, inout float mxbf, inout float vign, float ar)
 }
 
 float scimpresp(float range){//scanline IR
-    return sin(pow(range,capashape)*tau);
+    return sin(pow(range,capashape)*tau)+1.;
 }
 
 void main(){
     vec2 uv2;
-    float sc = (1.-min(scanline,1.))*global.SourceSize.y+scanline;
     float mxbf, vign;
-    vec2 ratd = vTexCoord*global.OutputSize.xy;
+    float scanline = (1.-min(scl,1.))*SourceSize.y+scl;
+
+    vec2 ratd = vTexCoord*OutputSize.xy;
     vec2 uv = vTexCoord;
-    pinc(uv,uv2,mxbf,vign,global.OutputSize.x/global.OutputSize.y);
+    pinc(uv,uv2,mxbf,vign,OutputSize.x/OutputSize.y);
     vec2 nuv = uv2;
-    nuv.y = floor(nuv.y*sc)/sc;
+    vec2 nuvyud = vec2(floor(nuv.y*scanline-1.)/scanline,floor(nuv.y*scanline+1.)/scanline);
+    nuv.y = floor(nuv.y*scanline)/scanline;
+
     vec3 bef = vec3(.0);
+    vec3 ucj = vec3(.0);
+    vec3 dcj = vec3(.0);
+    
     float capatemp, capainteg = .0;
     for(float i=-capaiter/2.;i<=capaiter/2.;i++){
         capatemp = scimpresp((i+capaiter/2.)/capaiter);
         capainteg += capatemp;
         bef += texture(Source,vec2(sawtooth(nuv.x-capa*i/(capaiter/2.)),nuv.y)).xyz*capatemp;
+        ucj += texture(Source,vec2(sawtooth(nuv.x-capa*i/(capaiter/2.)),nuvyud.y)).xyz*capatemp;
+        dcj += texture(Source,vec2(sawtooth(nuv.x-capa*i/(capaiter/2.)),nuvyud.x)).xyz*capatemp;
     }
+    dcj /= capainteg;
     bef /= capainteg;
-    vec3 scan = vec3(.0);
+    ucj /= capainteg;
+
+    vec3 scan =vec3(.0);
     float temp;
     float snippet;
     float integral = .0;
-    
     for(float i = -AAz/2.; i<=AAz/2. ;i++){
         snippet = (AAz/2.-abs(i))/AAz/2.;
         integral += snippet;
-        temp = uv2.y*sc+i/global.OutputSize.y*vex/(AAz/2.)*sc;
-        scan += step(.0,triangle(temp)-1.+(bef))*snippet;//antimoire convololution
+        temp = sawtooth(uv2.y*scanline);
+        scan += tpscany(bef,ucj,dcj,temp,(i/AAz*2.)*vex/OutputSize.y*scanline)*snippet;//antimoire convololution
     }
     scan /= integral;
+
     float brd = step(mxbf,.0);
     vign = pow(vign,vstr);
+
     vec3 grid = vec3(grd(ratd,cr),grd(ratd,cg),grd(ratd,cb));
     grid += vec3(grd(ratd,cr+cw),grd(ratd,cg+cw),grd(ratd,cb+cw));
+
     float mask = brd*vign;
+
+    scan /= sling;
+    scan = pow(scan,vec3(0.5));
     scan = pow(scan,vec3(gma));
+
+    vec3 discr = clamp(vec3(1.),vec3(.0),scan*3.);
     vec3 grided = scan*grid*3.;
-    vec3 final = min(mix(grided,scan,scan),vec3(1.))*mask;
+
+    vec3 final = min(vec3(mix(grided,scan,scan)),vec3(1.))*mask;
+
     FragColor = vec4(final,1.);
 }
