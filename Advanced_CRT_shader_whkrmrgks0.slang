@@ -29,6 +29,7 @@ layout(set = 0, binding = 0, std140) uniform UBO
 {
    mat4 MVP;
    vec4 OutputSize;
+   vec4 SourceSize;
 } global;
 
 #pragma parameter cus "CRT curvature" 0.15 0.0 1.0 0.01
@@ -40,7 +41,7 @@ layout(set = 0, binding = 0, std140) uniform UBO
 #pragma parameter capa "Horizontal convolution size" 0.004 0.0 0.2 0.0001
 #pragma parameter capaiter "Horizontal convolution iterations" 3.0 1.0 20.0 1.0
 #pragma parameter capashape "Horizontal convololution kernel shape" 3.0 1.0 40.0 0.1
-#pragma parameter scanline "Scnaline count" 160.0 120.0 1080.0 1.0
+#pragma parameter scanline "Scnaline count, set 0 to match with input" 160.0 0.0 1080.0 1.0
 #pragma parameter gma "Gamma correction" 1.0 0.0 4.0 0.1
 
 #pragma stage vertex
@@ -101,12 +102,13 @@ float scimpresp(float range){//scanline IR
 
 void main(){
     vec2 uv2;
+    float sc = (1.-min(scanline,1.))*global.SourceSize.y+scanline;
     float mxbf, vign;
     vec2 ratd = vTexCoord*global.OutputSize.xy;
     vec2 uv = vTexCoord;
     pinc(uv,uv2,mxbf,vign,global.OutputSize.x/global.OutputSize.y);
     vec2 nuv = uv2;
-    nuv.y = floor(nuv.y*scanline)/scanline;
+    nuv.y = floor(nuv.y*sc)/sc;
     vec3 bef = vec3(.0);
     float capatemp, capainteg = .0;
     for(float i=-capaiter/2.;i<=capaiter/2.;i++){
@@ -119,10 +121,11 @@ void main(){
     float temp;
     float snippet;
     float integral = .0;
+    
     for(float i = -AAz/2.; i<=AAz/2. ;i++){
         snippet = (AAz/2.-abs(i))/AAz/2.;
         integral += snippet;
-        temp = uv2.y*scanline+i/global.OutputSize.y*vex/(AAz/2.)*scanline;
+        temp = uv2.y*sc+i/global.OutputSize.y*vex/(AAz/2.)*sc;
         scan += step(.0,triangle(temp)-1.+(bef))*snippet;//antimoire convololution
     }
     scan /= integral;
