@@ -87,7 +87,7 @@ float grd(vec2 uv, vec2 disp){
 }
 
 void pinc(vec2 uv, inout vec2 uv2, inout float mxbf, inout float vign, float ar){
-    uv2 = (uv*vec2(2.)-vec2(1.))*vec2(1.+marginv);
+    uv2 = (uv*vec2(2.)-vec2(1.))*vec2((1.+marginv),(1.+marginv*ar));
     uv2 = vec2(uv2.x/(cos(abs(uv2.y*cus)*tau/4.)),uv2.y/(cos(abs(uv2.x*cus*ar)*tau/4.)));
     vec2 uvbef = abs(uv2)-vec2(1.);//boarder
     mxbf = max(uvbef.x,uvbef.y);
