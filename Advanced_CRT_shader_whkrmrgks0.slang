@@ -31,7 +31,7 @@ layout(set = 0, binding = 0, std140) uniform UBO
    vec4 OutputSize;
 } global;
 
-#pragma parameter cus "CRT curvature" 0.05 0.0 2.0 0.01
+#pragma parameter cus "CRT curvature" 0.2 0.0 1.0 0.01
 #pragma parameter vstr "Vignette strength" 0.05 0.0 1.0 0.01
 #pragma parameter marginv "Display margin" 0.02 0.0 0.1 0.005
 #pragma parameter dts "Phosper size" 1.0 1.0 3.0 1.0
