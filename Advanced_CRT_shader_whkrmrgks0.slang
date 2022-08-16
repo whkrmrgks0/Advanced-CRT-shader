@@ -1,3 +1,5 @@
+#version 450
+
 /*
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -8,7 +10,6 @@ You should have received a copy of the GNU General Public License along with thi
 copyright 2022 whkrmrgks0
 */
 
-#version 450
 
 layout(push_constant) uniform Push{
     float cus;
@@ -131,7 +132,7 @@ void main(){
     vec3 grid = vec3(grd(ratd,cr),grd(ratd,cg),grd(ratd,cb));
     grid += vec3(grd(ratd,cr+cw),grd(ratd,cg+cw),grd(ratd,cb+cw));
     float mask = brd*vign;
-    //FragColor = vec4(vec3(scan*grid),1.);
+    scan = pow(scan,vec3(gma));
     vec3 grided = scan*grid*3.;
     vec3 discr = min(scan*1.,1.);
     vec3 final = mix(grided,scan,discr)*mask;
