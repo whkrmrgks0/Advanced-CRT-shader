@@ -31,7 +31,7 @@ layout(set = 0, binding = 0, std140) uniform UBO
    vec4 OutputSize;
 } global;
 
-#pragma parameter cus "CRT curvature" 0.2 0.0 1.0 0.01
+#pragma parameter cus "CRT curvature" 0.15 0.0 1.0 0.01
 #pragma parameter vstr "Vignette strength" 0.05 0.0 1.0 0.01
 #pragma parameter marginv "Display margin" 0.02 0.0 0.1 0.005
 #pragma parameter dts "Phosper size" 1.0 1.0 3.0 1.0
@@ -86,9 +86,9 @@ float grd(vec2 uv, vec2 disp){
     return square(uv.x,2.,6.)*square(uv.y,1.,2.);
 }
 
-void pinc(vec2 uv, inout vec2 uv2, inout float mxbf, inout float vign){
+void pinc(vec2 uv, inout vec2 uv2, inout float mxbf, inout float vign, float ar){
     uv2 = (uv*vec2(2.)-vec2(1.))*vec2(1.+marginv);
-    uv2 = vec2(uv2.x/(cos(abs(uv2.y*cus)*tau/4.)),uv2.y/(cos(abs(uv2.x*cus)*tau/4.)));
+    uv2 = vec2(uv2.x/(cos(abs(uv2.y*cus)*tau/4.)),uv2.y/(cos(abs(uv2.x*cus*ar)*tau/4.)));
     vec2 uvbef = abs(uv2)-vec2(1.);//boarder
     mxbf = max(uvbef.x,uvbef.y);
     vign = max(uvbef.x*uvbef.y,.0);
@@ -104,7 +104,7 @@ void main(){
     float mxbf, vign;
     vec2 ratd = vTexCoord*global.OutputSize.xy;
     vec2 uv = vTexCoord;
-    pinc(uv,uv2,mxbf,vign);
+    pinc(uv,uv2,mxbf,vign,global.OutputSize.x/global.OutputSize.y);
     vec2 nuv = uv2;
     nuv.y = floor(nuv.y*scanline)/scanline;
     vec3 bef = vec3(.0);
