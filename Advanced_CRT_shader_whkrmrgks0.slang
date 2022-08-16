@@ -35,7 +35,7 @@ layout(set = 0, binding = 0, std140) uniform UBO
 #pragma parameter vstr "Vignette strength" 0.05 0.0 1.0 0.01
 #pragma parameter marginv "Display margin" 0.02 0.0 0.1 0.005
 #pragma parameter dts "Phosper size" 1.0 1.0 3.0 1.0
-#pragma parameter AAz "De-moire conv iteration" 64.0 1.0 256.0 1.0
+#pragma parameter AAz "De-moire conv iteration" 64.0 2.0 256.0 1.0
 #pragma parameter vex "De-moire conv size" 2.0 0.0 4.0 0.1
 #pragma parameter capa "Horizontal convolution size" 0.004 0.0 0.2 0.0001
 #pragma parameter capaiter "Horizontal convolution iterations" 3.0 1.0 20.0 1.0
@@ -109,7 +109,7 @@ void main(){
     nuv.y = floor(nuv.y*scanline)/scanline;
     vec3 bef = vec3(.0);
     float capatemp, capainteg = .0;
-    for(float i=-capaiter/2.;i<capaiter/2.;i++){
+    for(float i=-capaiter/2.;i<=capaiter/2.;i++){
         capatemp = scimpresp((i+capaiter/2.)/capaiter);
         capainteg += capatemp;
         bef += texture(Source,vec2(sawtooth(nuv.x-capa*i/(capaiter/2.)),nuv.y)).xyz*capatemp;
@@ -119,7 +119,7 @@ void main(){
     float temp;
     float snippet;
     float integral = .0;
-    for(float i = -AAz/2.; i<AAz/2. ;i++){
+    for(float i = -AAz/2.; i<=AAz/2. ;i++){
         snippet = (AAz/2.-abs(i))/AAz/2.;
         integral += snippet;
         temp = uv2.y*scanline+i/global.OutputSize.y*vex/(AAz/2.)*scanline;
