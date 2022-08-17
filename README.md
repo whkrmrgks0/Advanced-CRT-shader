@@ -18,7 +18,8 @@ this shader features:
 
 Todo:
 >horizontal convolution with 3-channel 1D LUT<br />
->fully customizable phosper pattern<br />
+>Fully customizable phosper pattern<br />
+>Add adjustable noise again
 
 Done:
 >Option to match scanline to input height<br />
