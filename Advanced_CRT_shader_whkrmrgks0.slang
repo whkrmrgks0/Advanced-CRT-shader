@@ -10,7 +10,6 @@ You should have received a copy of the GNU General Public License along with thi
 copyright 2022 whkrmrgks0
 */
 
-
 layout(push_constant) uniform Push{
     float cus;
     float vstr;
