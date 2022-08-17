@@ -21,7 +21,7 @@ Todo:
 >fully customizable phosper pattern<br />
 
 Done:
->Match scanline to input height<br />
+>Option to match scanline to input height<br />
 >Scanline bleeding<br />
 
 aug 15 2022
