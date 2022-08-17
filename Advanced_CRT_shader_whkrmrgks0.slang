@@ -59,7 +59,6 @@ void main(){
 layout(location = 2) in vec2 vTexCoord;
 layout(location = 0) out vec4 FragColor;
 layout(binding = 1) uniform sampler2D Source;
-
 #define tau 6.28318530718
 #define cr vec2(4.,0.)
 #define cb vec2(2.,0.)
@@ -94,7 +93,7 @@ vec3 tpscany (vec3 bef,vec3 ucj,vec3 dcj,float temp){
     scan += max((clamp(.0,1.,temp*2.-1.)-2.)+(ucj*sling),.0);
     scan += max((clamp(.0,1.,-(temp*2.-1.))-2.)+(dcj*sling),.0);
     return scan/(sling*0.5);
-}    
+}
         
 void pinc(vec2 uv, inout vec2 uv2, inout float mxbf, inout float vign, float ar){
     uv2 = (uv*vec2(2.)-vec2(1.))*vec2((1.+marginv),(1.+marginv*ar));
@@ -124,7 +123,7 @@ void main(){
     vec3 bef = vec3(.0);
     vec3 ucj = vec3(.0);
     vec3 dcj = vec3(.0);
-    
+
     float capatemp, capainteg = .0;
     for(float i=-capaiter/2.;i<=capaiter/2.;i++){
         capatemp = scimpresp((i+capaiter/2.)/capaiter);
@@ -133,6 +132,7 @@ void main(){
         ucj += texture(Source,vec2(sawtooth(nuv.x-capa*i/(capaiter/2.)),nuvyud.y)).xyz*capatemp;
         dcj += texture(Source,vec2(sawtooth(nuv.x-capa*i/(capaiter/2.)),nuvyud.x)).xyz*capatemp;
     }
+
     dcj /= capainteg;
     bef /= capainteg;
     ucj /= capainteg;
@@ -161,9 +161,9 @@ void main(){
     scan = pow(scan,vec3(0.5));
     scan = pow(scan,vec3(1.+1./3.));
     scan = pow(scan,vec3(gma));
-    
+
     vec3 grided = scan*grid*3.;
     vec3 final = min(vec3(mix(grided,scan,scan)),vec3(1.))*mask;
-    
+
     FragColor = vec4(final,1.);
 }
