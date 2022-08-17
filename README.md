@@ -17,7 +17,12 @@ this shader features:
 >Anti moire convolution filter<br />
 
 Todo:
->scanline matching with input
+>horizontal convolution with 3-channel 1D LUT<br />
+>fully customizable phosper pattern<br />
+
+Done:
+>Match scanline to 0input height<br />
+>Scanline bleeding<br />
 
 aug 15 2022
 
