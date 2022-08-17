@@ -22,7 +22,7 @@ Todo:
 
 Done:
 >Option to match scanline to input height<br />
->Scanline bleeding<br />
+>Customisable scanline bleeding indepdndent of perceived brightness<br />
 
 aug 15 2022
 
