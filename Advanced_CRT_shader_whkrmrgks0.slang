@@ -88,13 +88,12 @@ float grd(vec2 uv, vec2 disp){
     return square(uv.x,2.,6.)*square(uv.y,1.,2.);
 }
 
-vec3 tpscany (vec3 bef,vec3 ucj,vec3 dcj,float temp,float devi){
+vec3 tpscany (vec3 bef,vec3 ucj,vec3 dcj,float temp){
     vec3 scan = vec3(.0);
-        temp = clamp(.0,1.,sawtooth(temp))+devi;
-        scan += max((triangle(temp)-1.+(bef*sling)),.0);
-        scan += max((clamp(.0,1.,temp*2.-1.)-2.)+(ucj*sling),.0);
-        scan += max((clamp(.0,1.,-(temp*2.-1.))-2.)+(dcj*sling),.0);
-        return scan/(sling*0.5);
+    scan += max((triangle(temp)-1.+(bef*sling)),.0);
+    scan += max((clamp(.0,1.,temp*2.-1.)-2.)+(ucj*sling),.0);
+    scan += max((clamp(.0,1.,-(temp*2.-1.))-2.)+(dcj*sling),.0);
+    return scan/(sling*0.5);
 }    
         
 void pinc(vec2 uv, inout vec2 uv2, inout float mxbf, inout float vign, float ar){
@@ -146,7 +145,7 @@ void main(){
         snippet = (AAz/2.-abs(i))/AAz/2.;
         integral += snippet;
         temp = sawtooth(uv2.y*scanline);
-        scan += tpscany(bef,ucj,dcj,temp,(i/AAz*2.)*vex/OutputSize.y*scanline)*snippet;//antimoire convololution
+        scan += tpscany(bef,ucj,dcj,temp+(i/AAz*2.)*vex/OutputSize.y*scanline)*snippet;//antimoire convololution
     }
     scan /= integral;
 
