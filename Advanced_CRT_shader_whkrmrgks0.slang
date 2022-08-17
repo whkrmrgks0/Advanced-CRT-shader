@@ -38,7 +38,7 @@ layout(set = 0, binding = 0, std140) uniform UBO
 #pragma parameter dts "Phosper size" 1.0 1.0 3.0 1.0
 #pragma parameter AAz "De-moire conv iteration" 64.0 2.0 256.0 1.0
 #pragma parameter vex "De-moire conv size" 2.0 0.0 4.0 0.1
-#pragma parameter capa "Horizontal convolution size" 0.002 0.0 0.01 0.001
+#pragma parameter capa "Horizontal convolution size" 1.0 0.0 4.0 0.1
 #pragma parameter capaiter "Horizontal convolution iterations" 5.0 1.0 20.0 1.0
 #pragma parameter capashape "Horizontal convololution kernel shape" 3.0 1.0 40.0 0.1
 #pragma parameter scl "Scnaline count, set 0 to match with input" 240.0 0.0 1080.0 1.0
@@ -128,9 +128,9 @@ void main(){
     for(float i=-capaiter/2.;i<=capaiter/2.;i++){
         capatemp = scimpresp((i+capaiter/2.)/capaiter);
         capainteg += capatemp;
-        bef += texture(Source,vec2(sawtooth(nuv.x-capa*i/(capaiter/2.)),nuv.y)).xyz*capatemp;
-        ucj += texture(Source,vec2(sawtooth(nuv.x-capa*i/(capaiter/2.)),nuvyud.y)).xyz*capatemp;
-        dcj += texture(Source,vec2(sawtooth(nuv.x-capa*i/(capaiter/2.)),nuvyud.x)).xyz*capatemp;
+        bef += texture(Source,vec2(sawtooth(nuv.x-capa/scanline*i/(capaiter/2.)),nuv.y)).xyz*capatemp;
+        ucj += texture(Source,vec2(sawtooth(nuv.x-capa/scanline*i/(capaiter/2.)),nuvyud.y)).xyz*capatemp;
+        dcj += texture(Source,vec2(sawtooth(nuv.x-capa/scanline*i/(capaiter/2.)),nuvyud.x)).xyz*capatemp;
     }
 
     dcj /= capainteg;
