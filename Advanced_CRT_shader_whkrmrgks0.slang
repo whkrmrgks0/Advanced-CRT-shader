@@ -39,11 +39,11 @@ layout(set = 0, binding = 0, std140) uniform UBO
 #pragma parameter dts "Phosper size" 1.0 1.0 3.0 1.0
 #pragma parameter AAz "De-moire conv iteration" 64.0 2.0 256.0 1.0
 #pragma parameter vex "De-moire conv size" 2.0 0.0 4.0 0.1
-#pragma parameter capa "Horizontal convolution size" 0.004 0.0 0.01 0.001
-#pragma parameter capaiter "Horizontal convolution iterations" 3.0 1.0 20.0 1.0
+#pragma parameter capa "Horizontal convolution size" 0.002 0.0 0.01 0.001
+#pragma parameter capaiter "Horizontal convolution iterations" 5.0 1.0 20.0 1.0
 #pragma parameter capashape "Horizontal convololution kernel shape" 3.0 1.0 40.0 0.1
 #pragma parameter scl "Scnaline count, set 0 to match with input" 240.0 0.0 1080.0 1.0
-#pragma parameter gma "Gamma correction" 1.3 0.1 4.0 0.1
+#pragma parameter gma "Gamma correction" 1.0 0.1 4.0 0.1
 #pragma parameter sling "line bleed" 2.0 1.0 2.0 0.1
 
 #pragma stage vertex
@@ -162,12 +162,11 @@ void main(){
 
     scan /= sling;
     scan = pow(scan,vec3(0.5));
+    scan = pow(scan,vec3(1.+1./3.));
     scan = pow(scan,vec3(gma));
-
-    vec3 discr = clamp(vec3(1.),vec3(.0),scan*3.);
+    
     vec3 grided = scan*grid*3.;
-
     vec3 final = min(vec3(mix(grided,scan,scan)),vec3(1.))*mask;
-
+    
     FragColor = vec4(final,1.);
 }
